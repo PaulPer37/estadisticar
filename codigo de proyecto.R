@@ -48,14 +48,14 @@ n_total <- 300 * 5  # Total de plantas (300 grupos, 5 plantas por grupo)
 x_exitos <- sum(datos1$hojas == 3)  # Total de plantas con 3 hojas
 
 # Probabilidad teórica de éxito (aquí debes colocar la probabilidad teórica esperada)
-p_teorica <- 0.3  # Ejemplo, reemplaza con la probabilidad teórica real
+p_teorica <- 0.85  # Ejemplo, reemplaza con la probabilidad teórica real
 
 # Realizar la prueba binomial
-prueba_binomial <- binom.test(x = x_exitos, n = n_total, p = p_teorica)
+prueba_binomial <- binom.test(x = 1300, n = 1500, p = 0.85)
 
 # Resultados de la prueba
 print(prueba_binomial)
-
+print(prueba_binomial$p.value)
 # Interpretar resultados
 if (prueba_binomial$p.value < 0.05) {
   cat("Los datos no se ajustan bien a la distribución binomial con la probabilidad teórica.\n")
