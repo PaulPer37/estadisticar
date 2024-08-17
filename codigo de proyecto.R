@@ -61,6 +61,10 @@ var.test(x = st, y = sa,
          ratio = 1, 
          alternative = "two.sided",
          conf.level = .95)
+#Prueba de dos medias
+prueba_t <- t.test(st, sa, var.equal = TRUE)  # Usar var.equal=TRUE si se asume igualdad de varianzas
+
+print(prueba_t)
 #comprobar binomial
 n_total <- 300 * 5  # Total de plantas (300 grupos, 5 plantas por grupo)
 x_exitos <- sum(datos1$hojas == 3)  # Total de plantas con 3 hojas
