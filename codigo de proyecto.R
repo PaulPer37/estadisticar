@@ -29,7 +29,7 @@ prop.table(table(datos1$hojas, datos1$Sustrato))
 ggplot(data= datos1, aes(x= hojas, fill= Sustrato)) + 
   geom_bar()
 chisq.test(x= datos1$hojas, y= datos1$Sustrato)
-#Prueba de medias
+
 
 #Independecia del riego
 table(datos1$hojas, datos1$Riego)
@@ -62,7 +62,7 @@ var.test(x = st, y = sa,
          alternative = "two.sided",
          conf.level = .95)
 #Prueba de dos medias
-prueba_t <- t.test(st, sa, var.equal = TRUE)  # Usar var.equal=TRUE si se asume igualdad de varianzas
+prueba_t <- t.test(st, sa, var.equal = TRUE)  
 
 print(prueba_t)
 #comprobar binomial
