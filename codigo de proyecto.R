@@ -2,7 +2,7 @@ library(readxl)
 file.choose()
 datos <- "C:\\Users\\RUCO HOUSE\\OneDrive\\Desktop\\pipo\\espol\\s3\\esta\\Proyecto_Estadística1.xlsx"
 excel_sheets(datos)
-
+#lo que sea
 
 datos1 <- read_excel(datos)
 head(datos1)
