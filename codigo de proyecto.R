@@ -1,10 +1,6 @@
 library(readxl)
 
-datos <- "~/Proyecto_Estadística1.xlsx"
-excel_sheets(datos)
-#lo que sea que sea
-
-datos1 <- read_excel(datos)
+datos1 <- read_csv("~/datasets/Datos1.csv")
 head(datos1)
 library(ggplot2)
 library(dplyr)
