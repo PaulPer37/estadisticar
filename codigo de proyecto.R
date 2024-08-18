@@ -66,12 +66,12 @@ print(prueba_t)
 #comprobar binomial
 n_total <- 300 * 5  # Total de plantas (300 grupos, 5 plantas por grupo)
 x_exitos <- sum(hoja == 3)  # Total de plantas con 3 hojas
-
+print(x_exitos/n_total)
 # Probabilidad teórica de éxito (aquí debes colocar la probabilidad teórica esperada)
-p_teorica <- 0.3  # Ejemplo, reemplaza con la probabilidad teórica real
+p_teorica <- 0.1  # Ejemplo, reemplaza con la probabilidad teórica real
 
 # Realizar la prueba binomial
-prueba_binomial <- binom.test(x = x_exitos, n = 1500, p = 0.15)
+prueba_binomial <- binom.test(x = x_exitos, n = 1500, p = 0.1)
 
 # Resultados de la prueba
 print(prueba_binomial)
@@ -82,7 +82,7 @@ if (prueba_binomial$p.value < 0.05) {
 } else {
   cat("Los datos se ajustan bien a la distribución binomial con la probabilidad teórica.\n")
 }
-p_teorica <- 0.85  # Ejemplo, ajusta según sea necesario
+p_teorica <- 0.1  # Ejemplo, ajusta según sea necesario
 
 # Inicializar el dataframe de resultados
 resultados <- data.frame(Muestra = integer(), P_Valor = numeric(), Ajuste = character(), stringsAsFactors = FALSE)
@@ -99,9 +99,8 @@ for (grupo in grupos) {
   x_exitos <- sum(datos_grupo$hojas == 3)
   
   # Realizar la prueba binomial
-  prueba_binomial <- binom.test(x = x_exitos, n = 5, p = p_teorica)
-  
-  # Almacenar los resultados
+  prueba_binomial <- binom.test(x = x_exitos, n = 5, p = 0.1)
+
   resultados <- rbind(resultados, data.frame(
     Muestra = grupo,
     P_Valor = prueba_binomial$p.value,
@@ -109,6 +108,15 @@ for (grupo in grupos) {
     stringsAsFactors = FALSE
   ))
 }
+datos_grupo1 <- datos1 %>% filter(muestra == 1)
 
+# Contar el número de éxitos (plantas con 3 hojas)
+x_exitos1 <- sum(datos_grupo1$hojas == 3)
+probabilidad_0_exitos <- dbinom(x=0, size = 5, prob = 0.1)
+print(probabilidad_0_exitos)
+prueba_binomial1 <- binom.test(x = 0, n = 5, p = 0.1)
+print(prueba_binomial1)
+P_Valor1 = prueba_binomial$p.value
+print(P_Valor1)
 # Mostrar los resultados
 print(resultados)
