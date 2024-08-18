@@ -8,7 +8,8 @@ library(dplyr)
 ?"$"
 
 hoja <- datos1$hojas
-riego <- datos1$Riego
+riego <- datos1$riego
+sustrato <- datos1$sustrato
 min(hoja)
 max(hoja)
 mean(hoja) #media de hojas = 2.48
@@ -18,26 +19,26 @@ boxplot(hoja)
 chisq.test(hoja)
 
 #Independencia del sustrato
-table(datos1$hojas, datos1$Sustrato)
+table(hoja, sustrato)
 
 
-prop.table(table(datos1$hojas, datos1$Sustrato))
+prop.table(table(hoja, sustrato))
 
-ggplot(data= datos1, aes(x= hojas, fill= Sustrato)) + 
+ggplot(data= datos1, aes(x= hoja, fill= sustrato)) + 
   geom_bar()
-chisq.test(x= datos1$hojas, y= datos1$Sustrato)
+chisq.test(x= hoja, y= sustrato)
 
 
 #Independecia del riego
-table(datos1$hojas, datos1$Riego)
+table(hoja, riego)
 
 
-prop.table(table(datos1$hojas, datos1$Riego))
+prop.table(table(hoja, riego))
 
 ggplot(data= datos1, aes(x= hojas, fill= Riego)) + 
   geom_bar()
 ?chisq.test
-chisq.test(x= datos1$hojas, y= datos1$Riego)
+chisq.test(x= hoja, y= riego)
 
 #Creacion de tablas para la comparacion de medias y varianzas
 #Prueba de varianzas
@@ -45,12 +46,12 @@ chisq.test(x= datos1$hojas, y= datos1$Riego)
 #H0: var_st == var_sa
 #Ha: var_st != var_sa
 st <- datos1 %>%
-  filter(datos1$Sustrato == "T") %>%
+  filter(sustrato == "T") %>%
   select(hojas) %>%
   unlist()
 
 sa <- datos1 %>%
-  filter(datos1$Sustrato == "A") %>%
+  filter(sustrato == "A") %>%
   select(hojas) %>%
   unlist()
 ?var.test
@@ -59,18 +60,18 @@ var.test(x = st, y = sa,
          alternative = "two.sided",
          conf.level = .95)
 #Prueba de dos medias
-prueba_t <- t.test(st, sa, var.equal = TRUE)  
+prueba_t <- t.test(st, sa, var.equal = FALSE)  
 
 print(prueba_t)
 #comprobar binomial
 n_total <- 300 * 5  # Total de plantas (300 grupos, 5 plantas por grupo)
-x_exitos <- sum(datos1$hojas == 3)  # Total de plantas con 3 hojas
+x_exitos <- sum(hoja == 3)  # Total de plantas con 3 hojas
 
 # Probabilidad teórica de éxito (aquí debes colocar la probabilidad teórica esperada)
-p_teorica <- 0.85  # Ejemplo, reemplaza con la probabilidad teórica real
+p_teorica <- 0.3  # Ejemplo, reemplaza con la probabilidad teórica real
 
 # Realizar la prueba binomial
-prueba_binomial <- binom.test(x = 1330, n = 1500, p = 0.85)
+prueba_binomial <- binom.test(x = x_exitos, n = 1500, p = 0.15)
 
 # Resultados de la prueba
 print(prueba_binomial)
@@ -81,6 +82,33 @@ if (prueba_binomial$p.value < 0.05) {
 } else {
   cat("Los datos se ajustan bien a la distribución binomial con la probabilidad teórica.\n")
 }
+p_teorica <- 0.85  # Ejemplo, ajusta según sea necesario
 
+# Inicializar el dataframe de resultados
+resultados <- data.frame(Muestra = integer(), P_Valor = numeric(), Ajuste = character(), stringsAsFactors = FALSE)
 
-            
+# Obtener los valores únicos de "muestra"
+grupos <- unique(datos1$muestra)
+
+# Iterar sobre cada grupo
+for (grupo in grupos) {
+  # Filtrar los datos para el grupo actual
+  datos_grupo <- datos1 %>% filter(muestra == grupo)
+  
+  # Contar el número de éxitos (plantas con 3 hojas)
+  x_exitos <- sum(datos_grupo$hojas == 3)
+  
+  # Realizar la prueba binomial
+  prueba_binomial <- binom.test(x = x_exitos, n = 5, p = p_teorica)
+  
+  # Almacenar los resultados
+  resultados <- rbind(resultados, data.frame(
+    Muestra = grupo,
+    P_Valor = prueba_binomial$p.value,
+    Ajuste = ifelse(prueba_binomial$p.value < 0.05, "No ajusta", "Ajusta"),
+    stringsAsFactors = FALSE
+  ))
+}
+
+# Mostrar los resultados
+print(resultados)

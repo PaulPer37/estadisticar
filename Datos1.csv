@@ -1,4 +1,4 @@
-﻿Muestra,Número de  hojas,"Sustrato (A=arena, T=tierra)","Riego (A=sólo mañana, B=mañana y tarde)",Tipo
+﻿muestra,hojas,sustrato,riego,tipo
 1,2,A,B,3
 1,2,T,A,4
 1,2,A,A,1
