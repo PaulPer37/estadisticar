@@ -1,5 +1,5 @@
 library(readxl)
-
+library(readr)
 datos1 <- read_csv("~/datasets/Datos1.csv")
 head(datos1)
 library(ggplot2)
