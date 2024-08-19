@@ -1,7 +1,7 @@
 library(readxl)
 library(readr)
 datos<- "~/datasets/Datos1.csv"
-datos1 <- read_csv("Datos1.csv")
+datos1 <- read_csv("C:/Users/RUCO HOUSE/OneDrive/Desktop/pipo/espol/s3/esta/estadisticar/Datos1.csv")
 head(datos1)
 library(ggplot2)
 library(dplyr)
@@ -12,8 +12,8 @@ riego <- datos1$riego
 sustrato <- datos1$sustrato
 min(hoja)
 max(hoja)
-mean(hoja) #media de hojas = 2.48
-sd(hoja) #desviacion estandar de hojas = 1.12
+mean(hoja) 
+sd(hoja) 
 hist(hoja)
 boxplot(hoja)
 chisq.test(hoja)
@@ -35,7 +35,7 @@ table(hoja, riego)
 
 prop.table(table(hoja, riego))
 
-ggplot(data= datos1, aes(x= hojas, fill= Riego)) + 
+ggplot(data= datos1, aes(x= hoja, fill= riego)) + 
   geom_bar()
 ?chisq.test
 chisq.test(x= hoja, y= riego)
@@ -59,46 +59,58 @@ var.test(x = st, y = sa,
          ratio = 1, 
          alternative = "two.sided",
          conf.level = .95)
-#Prueba de dos medias
+#Prueba de dos medias sustrato
+ra <- datos1 %>%
+  filter(riego == "A") %>%
+  select(hojas) %>%
+  unlist()
+
+rb <- datos1 %>%
+  filter(riego == "B") %>%
+  select(hojas) %>%
+  unlist()
+?var.test
+var.test(x = ra, y = rb,
+         ratio = 1, 
+         alternative = "two.sided",
+         conf.level = .95)
+#Prueba de dos medias riego
+prueba_t2 <- t.test(ra, rb, var.equal = TRUE)  
+
+print(prueba_t2)
+#Prueba de dos medias sustrato
 prueba_t <- t.test(st, sa, var.equal = FALSE)  
 
 print(prueba_t)
-#comprobar binomial
-n_total <- 300 * 5  # Total de plantas (300 grupos, 5 plantas por grupo)
-x_exitos <- sum(hoja == 3)  # Total de plantas con 3 hojas
+#comprobar binomial para muestra de 1500
+n_total <- 300 * 5  
+x_exitos <- sum(hoja == 3)
 print(x_exitos/n_total)
-# Probabilidad teórica de éxito (aquí debes colocar la probabilidad teórica esperada)
-p_teorica <- 0.1  # Ejemplo, reemplaza con la probabilidad teórica real
 
-# Realizar la prueba binomial
+p_teorica <- 0.1  
+
+
 prueba_binomial <- binom.test(x = x_exitos, n = 1500, p = 0.1)
 
-# Resultados de la prueba
+
 print(prueba_binomial)
 print(prueba_binomial$p.value)
-# Interpretar resultados
+
 if (prueba_binomial$p.value < 0.05) {
   cat("Los datos no se ajustan bien a la distribución binomial con la probabilidad teórica.\n")
 } else {
   cat("Los datos se ajustan bien a la distribución binomial con la probabilidad teórica.\n")
 }
-p_teorica <- 0.1  # Ejemplo, ajusta según sea necesario
-
-# Inicializar el dataframe de resultados
+#Prueba binomial para cada grupo, ver si cumple distribución
 resultados <- data.frame(Muestra = integer(), P_Valor = numeric(), Ajuste = character(), stringsAsFactors = FALSE)
 
-# Obtener los valores únicos de "muestra"
 grupos <- unique(datos1$muestra)
 
 # Iterar sobre cada grupo
 for (grupo in grupos) {
-  # Filtrar los datos para el grupo actual
   datos_grupo <- datos1 %>% filter(muestra == grupo)
-  
-  # Contar el número de éxitos (plantas con 3 hojas)
   x_exitos <- sum(datos_grupo$hojas == 3)
   
-  # Realizar la prueba binomial
   prueba_binomial <- binom.test(x = x_exitos, n = 5, p = 0.1)
 
   resultados <- rbind(resultados, data.frame(
@@ -108,15 +120,31 @@ for (grupo in grupos) {
     stringsAsFactors = FALSE
   ))
 }
-datos_grupo1 <- datos1 %>% filter(muestra == 1)
+#Normal
 
-# Contar el número de éxitos (plantas con 3 hojas)
-x_exitos1 <- sum(datos_grupo1$hojas == 3)
-probabilidad_0_exitos <- dbinom(x=0, size = 5, prob = 0.1)
-print(probabilidad_0_exitos)
-prueba_binomial1 <- binom.test(x = 0, n = 5, p = 0.1)
-print(prueba_binomial1)
-P_Valor1 = prueba_binomial$p.value
-print(P_Valor1)
-# Mostrar los resultados
-print(resultados)
+observados <- table(datos1$hojas)
+observados <- as.numeric(observados)
+names(observados) <- as.character(names(table(datos1$hojas)))
+print(observados)
+
+media <- mean(datos1$hojas)
+sd <- sd(datos1$hojas)
+print(media)
+print(sd)
+
+intervalos <- c(0.5, 1.5, 2.5, 3.5)
+
+esperados <- sapply(1:(length(intervalos) - 1), function(i) {
+  pnorm(intervalos[i+1], mean = media, sd = sd) - pnorm(intervalos[i], mean = media, sd = sd)
+})
+esperados <- esperados * sum(observados)
+print(esperados)
+
+prueba_chisq <- chisq.test(x = observados, p = esperados / sum(esperados))
+print(prueba_chisq)
+
+if (prueba_chisq$p.value < 0.05) {
+  cat("Los datos no se ajustan a la distribución normal")
+} else {
+  cat("Los datos se ajustan a la distribución normal")
+}
