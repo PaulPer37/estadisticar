@@ -16,13 +16,19 @@ mean(hoja)
 sd(hoja) 
 hist(hoja)
 boxplot(hoja)
+#Tabla de combinaciones
+library(dplyr)
 
+# Crear un dataframe con las variables relevantes
+datos <- data.frame(hojas = datos1$hojas, 
+                    riego = datos1$riego, 
+                    sustrato = datos1$sustrato)
 
-#Independencia del sustrato
-table(hoja, sustrato)
+# Crear una tabla con los valores de hojas para cada combinación de riego y sustrato
+tabla_combinaciones <- datos %>%
+  group_by(riego, sustrato) %>%
+  summarize(valores = list(hojas), .groups = 'drop')
 
-
-prop.table(table(hoja, sustrato))
 
 ggplot(data= datos1, aes(x= hoja, fill= sustrato)) + 
   geom_bar()
@@ -178,4 +184,26 @@ ggplot(resumen, aes(x = interaction(riego, sustrato), y = Tasa_Exito, fill = int
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+
+valores <- unique(datos1$hojas)
+
+# Calcula la frecuencia de cada valor
+frecuencias <- table(datos1$hojas)
+
+# Calcula las probabilidades dividiendo la frecuencia de cada valor por el total
+probabilidades <- frecuencias / sum(frecuencias)
+
+# Muestra la lista de probabilidades
+probabilidades
+
+
+datos <- data.frame(hojas = datos1$hojas, 
+                    riego = datos1$riego, 
+                    sustrato = datos1$sustrato)
+
+# Crear los boxplots para cada combinación de riego y sustrato  
+ggplot(datos, aes(x = interaction(riego, sustrato), y = hojas, fill = interaction(riego, sustrato))) +
+  geom_boxplot() +
+  labs(x = "Combinación de Riego y Sustrato", y = "Número de Hojas", fill = "Combinación") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
