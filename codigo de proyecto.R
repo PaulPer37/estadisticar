@@ -151,6 +151,7 @@ if (prueba_chisq$p.value < 0.05) {
 } else {
   cat("Los datos se ajustan a la distribución normal")
 }
+
 #Tabla
 datos <- data.frame(
   hojas = hoja,
@@ -158,11 +159,9 @@ datos <- data.frame(
   sustrato = sustrato
 )
 
-# Calcular éxitos (tener 3 hojas)
 datos <- datos %>%
   mutate(exito = ifelse(hojas == 3, 1, 0))
 
-# Resumir datos por combinación de riego y sustrato
 resumen <- datos %>%
   group_by(riego, sustrato) %>%
   summarise(
@@ -171,10 +170,8 @@ resumen <- datos %>%
     Tasa_Exito = Exitos / Total
   )
 
-# Mostrar la tabla resumen
 print(resumen)
 
-# Graficar la tasa de éxito
 ggplot(resumen, aes(x = interaction(riego, sustrato), y = Tasa_Exito, fill = interaction(riego, sustrato))) +
   geom_bar(stat = "identity") +
   labs(x = "Combinación de Riego y Sustrato", y = "Tasa de Éxito", title = "Tasa de Éxito por Combinación de Riego y Sustrato") +
@@ -182,21 +179,3 @@ ggplot(resumen, aes(x = interaction(riego, sustrato), y = Tasa_Exito, fill = int
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
-
-# Datos observados
-observados <- c(42, 1303, 155)
-
-# Normalizar los datos a una distribución normal
-# Se asume una media y desviación estándar basada en los datos esperados
-mean_esperado <- mean(c(78.51884, 1248.16678, 173.26363))
-sd_esperado <- sd(c(78.51884, 1248.16678, 173.26363))
-
-# Ajustar los datos observados a la distribución normal teórica
-# Nota: Normalmente se necesita un tamaño de muestra mayor para que esta prueba sea efectiva
-datos_normalizados <- (observados - mean_esperado) / sd_esperado
-
-# Comparar con una distribución normal teórica
-ks_test_result <- ks.test(datos_normalizados, "pnorm", mean = 0, sd = 1)
-
-# Mostrar resultados
-print(ks_test_result)
