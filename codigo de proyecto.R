@@ -306,4 +306,18 @@ for (i in 1:nrow(combinaciones)) {
 # Mostrar los resultados
 print(resultados_ttest)
 
+#Probabilididades binomial
+
+n <- 5  
+p <- prob  
+
+probabilidades <- dbinom(0:n, size = n, prob = p)
+
+tabla_probabilidades <- data.frame(
+  Exitos = 0:n,
+  Probabilidad = probabilidades
+)
+
+# Mostrar la tabla
+print(tabla_probabilidades)
 
