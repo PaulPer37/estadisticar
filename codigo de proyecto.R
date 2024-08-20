@@ -6,6 +6,17 @@ head(datos1)
 library(ggplot2)
 library(dplyr)
 ?"$"
+datosp <- read_excel("C:/Users/RUCO HOUSE/OneDrive/Desktop/pipo/espol/s3/esta/estadisticar/Prueba piloto.xlsx")
+head(datosp)
+hojap <- datosp$hojas
+frecuencias <- table(hojap)
+frecuencias_interes <- frecuencias[names(frecuencias) %in% c("1", "2", "3")]
+total <- sum(frecuencias)
+probabilidades <- frecuencias_interes / total
+frecuencias_interes
+probabilidades
+prob <- 0.1167
+
 
 hoja <- datos1$hojas
 riego <- datos1$riego
@@ -93,7 +104,7 @@ n_total <- 300 * 5
 x_exitos <- sum(hoja == 3)
 print(x_exitos/n_total)
 
-p_teorica <- 0.1  
+prob <- 0.1167  
 
 
 prueba_binomial <- binom.test(x = x_exitos, n = 1500, p = 0.1)
@@ -117,7 +128,7 @@ for (grupo in grupos) {
   datos_grupo <- datos1 %>% filter(muestra == grupo)
   x_exitos <- sum(datos_grupo$hojas == 3)
   
-  prueba_binomial <- binom.test(x = x_exitos, n = 5, p = 0.1)
+  prueba_binomial <- binom.test(x = x_exitos, n = 5, p = prob)
 
   resultados <- rbind(resultados, data.frame(
     Muestra = grupo,
