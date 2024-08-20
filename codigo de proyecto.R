@@ -306,3 +306,4 @@ for (i in 1:nrow(combinaciones)) {
 # Mostrar los resultados
 print(resultados_ttest)
 
+
