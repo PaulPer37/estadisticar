@@ -16,6 +16,7 @@ probabilidades <- frecuencias_interes / total
 frecuencias_interes
 probabilidades
 prob <- 0.1167
+promedio_teorico <- mean(hojap)
 
 
 hoja <- datos1$hojas
@@ -27,6 +28,47 @@ mean(hoja)
 sd(hoja) 
 hist(hoja)
 boxplot(hoja)
+
+
+#Prueba de hipotesis igualdad de medias: poblacional, muestral
+prueba_varianza <- var.test(hoja, hojap)
+prueba_varianza
+promedio_hoja <- mean(hoja, na.rm = TRUE)
+promedio_hojap <- mean(hojap, na.rm = TRUE)
+promedio_hoja
+promedio_hojap
+prueba_t <- t.test(hoja, hojap, var.equal = TRUE)
+prueba_t
+
+#Frecuencias poblacinal con muestral
+frecuencias_hoja <- table(datos1$hojas)
+frecuencias_hojap <- table(hojap)
+
+# Convertir las frecuencias absolutas en frecuencias relativas
+frecuencia_relativa_hoja <- frecuencias_hoja / sum(frecuencias_hoja)
+frecuencia_relativa_hojap <- frecuencias_hojap / sum(frecuencias_hojap)
+
+# Crear un dataframe con las frecuencias relativas
+df_frecuencias <- data.frame(
+  Valor = as.numeric(names(frecuencia_relativa_hoja)),
+  Frecuencia_Relativa_hoja = as.numeric(frecuencia_relativa_hoja),
+  Frecuencia_Relativa_hojap = as.numeric(frecuencia_relativa_hojap)
+)
+df_frecuencias
+# Reorganizar datos para facilitar el gráfico
+df_frecuencias_long <- df_frecuencias %>%
+  pivot_longer(cols = c(Frecuencia_Relativa_hoja, Frecuencia_Relativa_hojap), 
+               names_to = "Variable", 
+               values_to = "Frecuencia_Relativa")
+
+# Crear el gráfico de barras de frecuencias relativas
+ggplot(df_frecuencias_long, aes(x = as.factor(Valor), y = Frecuencia_Relativa, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Número de Hojas", y = "Frecuencia Relativa", 
+       title = "Comparación de Frecuencias Relativas de Hojas entre 'hoja' y 'hojap'",
+       fill = "Variable") +
+  theme_minimal()
+
 #Tabla de combinaciones
 library(dplyr)
 
@@ -40,7 +82,8 @@ tabla_combinaciones <- datos %>%
   group_by(riego, sustrato) %>%
   summarize(valores = list(hojas), .groups = 'drop')
 
-
+#Independienza sustrato
+table(hoja, sustrato)
 ggplot(data= datos1, aes(x= hoja, fill= sustrato)) + 
   geom_bar()
 chisq.test(x= hoja, y= sustrato)
@@ -107,7 +150,7 @@ print(x_exitos/n_total)
 prob <- 0.1167  
 
 
-prueba_binomial <- binom.test(x = x_exitos, n = 1500, p = 0.1)
+prueba_binomial <- binom.test(x = x_exitos, n = 1500, p = 0.1167)
 
 
 print(prueba_binomial)
@@ -163,11 +206,6 @@ print(esperados)
 prueba_chisq <- chisq.test(x = observados, p = esperados / sum(esperados))
 print(prueba_chisq)
 
-if (prueba_chisq$p.value < 0.05) {
-  cat("Los datos no se ajustan a la distribución normal")
-} else {
-  cat("Los datos se ajustan a la distribución normal")
-}
 
 #Tabla
 datos <- data.frame(
@@ -200,15 +238,12 @@ valores <- unique(datos1$hojas)
 
 # Calcula la frecuencia de cada valor
 frecuencias <- table(datos1$hojas)
-
-# Calcula las probabilidades dividiendo la frecuencia de cada valor por el total
+frecuencias
 probabilidades <- frecuencias / sum(frecuencias)
-
-# Muestra la lista de probabilidades
 probabilidades
 
 
-datos <- data.frame(hojas = datos1$hojas, 
+atos <- data.frame(hojas = datos1$hojas, 
                     riego = datos1$riego, 
                     sustrato = datos1$sustrato)
 
@@ -217,4 +252,57 @@ ggplot(datos, aes(x = interaction(riego, sustrato), y = hojas, fill = interactio
   geom_boxplot() +
   labs(x = "Combinación de Riego y Sustrato", y = "Número de Hojas", fill = "Combinación") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+#Prueba de Hipotesis de Superioridad Combinazión de Arena con Riego distribuido
+# Filtrar la combinación sustrato A y riego B
+comb_ab <- datos %>% filter(sustrato == "A" & riego == "B")
+otras_combinaciones <- datos %>% filter(!(sustrato == "A" & riego == "B"))
+prueba_varianza <- var.test(comb_ab$hojas, otras_combinaciones$hojas)
+prueba_varianza
+prueba_t_combinaciones <- t.test(comb_ab$hojas, otras_combinaciones$hojas, var.equal = FALSE)
+print(prueba_t_combinaciones)
+
+#Medias entre cada subgrupo
+# Crear todas las combinaciones de riego y sustrato
+combinaciones <- unique(datos %>% select(riego, sustrato))
+
+# Crear un dataframe para almacenar los resultados
+resultados_ttest <- data.frame(
+  Combinacion1 = character(),
+  Combinacion2 = character(),
+  Media1 = numeric(),
+  Media2 = numeric(),
+  P_Valor = numeric(),
+  Diferencia_Significativa = character(),
+  stringsAsFactors = FALSE
+)
+
+# Realizar pruebas t entre cada par de combinaciones
+for (i in 1:nrow(combinaciones)) {
+  for (j in (i+1):nrow(combinaciones)) {
+    comb1 <- combinaciones[i, ]
+    comb2 <- combinaciones[j, ]
+    
+    # Filtrar los datos para las combinaciones
+    grupo1 <- datos %>% filter(riego == comb1$riego & sustrato == comb1$sustrato) %>% select(hojas)
+    grupo2 <- datos %>% filter(riego == comb2$riego & sustrato == comb2$sustrato) %>% select(hojas)
+    
+    # Realizar la prueba t
+    prueba_t <- t.test(grupo1$hojas, grupo2$hojas, var.equal = FALSE)
+    
+    # Almacenar los resultados
+    resultados_ttest <- rbind(resultados_ttest, data.frame(
+      Combinacion1 = paste(comb1$riego, comb1$sustrato, sep = " - "),
+      Combinacion2 = paste(comb2$riego, comb2$sustrato, sep = " - "),
+      Media1 = mean(grupo1$hojas, na.rm = TRUE),
+      Media2 = mean(grupo2$hojas, na.rm = TRUE),
+      P_Valor = prueba_t$p.value,
+      Diferencia_Significativa = ifelse(prueba_t$p.value < 0.05, "Sí", "No")
+    ))
+  }
+}
+
+# Mostrar los resultados
+print(resultados_ttest)
 
